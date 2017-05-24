@@ -103,7 +103,7 @@ class Labeller():
         formated_example = ''
         for pair in self.record_pair:
             for field in self.fields:
-                line = "%s : %s" % (field, pair[field])
+                line = "{0!s} : {1!s}".format(field, pair[field])
                 formated_example += line + '\n'
             formated_example += '\n'
         return formated_example

@@ -1093,19 +1093,19 @@ class CustomTelephoneMatcher(TypeMatcher):
 PRENOM_LEXICON = fileToSet('prenom')
 PATRONYME_LEXICON = fileToSet('patronyme_fr')
 
-PAT_FIRST_NAME = '(%s)' % '|'.join([p for p in PRENOM_LEXICON])
+PAT_FIRST_NAME = '({0!s})'.format('|'.join([p for p in PRENOM_LEXICON]))
 PAT_LAST_NAME = '([A-Z][A-Za-z]+\s?)+'
 PAT_LAST_NAME_ALLCAPS = '([A-Z][A-Z]+\s?)+'
 #PAT_INITIAL = '[A-Z](\.|([\.\s\-]{1,3}\s?[A-Z])+)'
 PAT_INITIAL = '([A-Z][\.\-\s]{1,3}){1,3}'
 
 # Ignore case on these two
-PAT_FIRST_LAST_NAME = '\s*%s\s+(%s)\s*' % (PAT_FIRST_NAME, PAT_LAST_NAME)
-PAT_LAST_FIRST_NAME = '\s*(%s)\s+%s\s*' % (PAT_LAST_NAME, PAT_FIRST_NAME)
+PAT_FIRST_LAST_NAME = '\s*{0!s}\s+({1!s})\s*'.format(PAT_FIRST_NAME, PAT_LAST_NAME)
+PAT_LAST_FIRST_NAME = '\s*({0!s})\s+{1!s}\s*'.format(PAT_LAST_NAME, PAT_FIRST_NAME)
 
 # Don't ignore case on those two
-PAT_FIRSTINITIAL_LAST_NAME = '\s*(%s)\s+((%s)|(%s))\s*' % (PAT_INITIAL, PAT_LAST_NAME, PAT_LAST_NAME_ALLCAPS)
-PAT_LAST_FIRSTINITIAL_NAME = '\s*((%s)|(%s))\s+(%s)\s*' % (PAT_LAST_NAME, PAT_LAST_NAME_ALLCAPS, PAT_INITIAL)
+PAT_FIRSTINITIAL_LAST_NAME = '\s*({0!s})\s+(({1!s})|({2!s}))\s*'.format(PAT_INITIAL, PAT_LAST_NAME, PAT_LAST_NAME_ALLCAPS)
+PAT_LAST_FIRSTINITIAL_NAME = '\s*(({0!s})|({1!s}))\s+({2!s})\s*'.format(PAT_LAST_NAME, PAT_LAST_NAME_ALLCAPS, PAT_INITIAL)
 
 def patternWithWordBoundary(p): return '\\b' + p + '\\b'
 
@@ -1113,10 +1113,10 @@ def reCompiledWithWordBoundary(p, flags = 0): return re.compile(patternWithWordB
 
 PERSON_NAME_EXTRACTION_PATS = [
 	(reCompiledWithWordBoundary(PAT_FIRST_NAME, re.IGNORECASE), 1, -1),
-	(reCompiledWithWordBoundary('%s\s+(%s)' % (PAT_FIRST_NAME, PAT_LAST_NAME), re.IGNORECASE), 1, 2),
-	(reCompiledWithWordBoundary('(%s)\s+%s' % (PAT_LAST_NAME, PAT_FIRST_NAME), re.IGNORECASE), 3, 1),
-	(reCompiledWithWordBoundary('(%s)\s+((%s)|(%s))' % (PAT_INITIAL, PAT_LAST_NAME, PAT_LAST_NAME_ALLCAPS)), 1, 2),
-	(reCompiledWithWordBoundary('((%s)|(%s))\s+(%s)' % (PAT_LAST_NAME, PAT_LAST_NAME_ALLCAPS, PAT_INITIAL)), 2, 1) 
+	(reCompiledWithWordBoundary('{0!s}\s+({1!s})'.format(PAT_FIRST_NAME, PAT_LAST_NAME), re.IGNORECASE), 1, 2),
+	(reCompiledWithWordBoundary('({0!s})\s+{1!s}'.format(PAT_LAST_NAME, PAT_FIRST_NAME), re.IGNORECASE), 3, 1),
+	(reCompiledWithWordBoundary('({0!s})\s+(({1!s})|({2!s}))'.format(PAT_INITIAL, PAT_LAST_NAME, PAT_LAST_NAME_ALLCAPS)), 1, 2),
+	(reCompiledWithWordBoundary('(({0!s})|({1!s}))\s+({2!s})'.format(PAT_LAST_NAME, PAT_LAST_NAME_ALLCAPS, PAT_INITIAL)), 2, 1) 
 ]
 
 def validateFirstName(fst): return len(fst) > 1
@@ -1322,7 +1322,7 @@ class FrenchAddressMatcher(LabelMatcher):
 		super(FrenchAddressMatcher, self).__init__(F_ADDRESS, COMMUNE_LEXICON, MATCH_MODE_CLOSE)
 	@timed
 	def match(self, c):
-		response = urllib.urlopen("http://api-adresse.data.gouv.fr/search/?q=%s" % c.value)
+		response = urllib.urlopen("http://api-adresse.data.gouv.fr/search/?q={0!s}".format(c.value))
 		try:
 			data = json.loads(response.read())
 		except ValueError as e: 
@@ -1533,7 +1533,7 @@ def generateValueMatchers(lvl = 0):
 			ignoreCase = False, validators = fullNameValidators)
 	yield CompositeMatcher(F_PERSON, [F_TITLE, F_FIRST])
 	# Negate person name matches when it's a street name
-	if lvl >= 0: yield RegexMatcher(F_PERSON, "(rue|avenue|av|boulevard|bvd|bd|chemin|route|place|allee) .{0,10} (%s)" % PAT_FIRST_NAME, 
+	if lvl >= 0: yield RegexMatcher(F_PERSON, "(rue|avenue|av|boulevard|bvd|bd|chemin|route|place|allee) .{{0,10}} ({0!s})".format(PAT_FIRST_NAME), 
 		g = 1, ignoreCase = True, partial = True, neg = True)
 
 	# Web stuff: Email, URL
